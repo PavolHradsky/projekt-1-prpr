@@ -6,7 +6,7 @@
 * Program: Projekt 1
 */
 
-#include<stdio.h>
+#include<stdio.h>//poznamka
 #include<stdlib.h>
 #include<string.h>
 

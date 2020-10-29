@@ -10,9 +10,23 @@
 #include<stdlib.h>
 #include<string.h>
 
+#define MAX 50
+
+void v(){
+    FILE *fr;
+    char riadok[MAX];
+    fr = fopen("pacienti.txt", "r");
+    
+    while(fgets(riadok, MAX, fr) != NULL){
+        printf("%s", riadok);
+    }
+    
+    fclose(fr);
+}
+
 int main(void){
 
-    int a = 10;
+    v();
 
     return 0;
 }

@@ -13,7 +13,79 @@
 
 #define MAX 50
 
-int v(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, long long **p_rcislo, double **p_vysledok, int **p_datum){
+int v(){
+    FILE *fr;
+    char str[MAX];
+    int poc = 0;
+    if((fr = fopen("pacienti.txt", "r")) == NULL){
+        printf("Neotvoreny subor\n");
+        return -1;
+    }
+
+    while ((fgets(str, MAX, fr)) != NULL){
+        poc++;
+    }
+    rewind(fr);
+    int velkost = poc/7 + 1;
+    long long x;
+    for(int i = 0; i < poc; i++){
+        fgets(str, MAX, fr);
+        switch (i%7)
+        {
+        case 0:
+            printf("meno a priezvisko: %s", str);
+            break;
+        case 1:
+            x = atoll(str);
+            if((x > 999999999) && (x < 10000000000) && (x%11 == 0)){
+                printf("rodne cislo: %s", str);
+            }else{
+                printf("Nekorektne zadany vstup: rodne cislo\n");
+                return -1;
+            }
+            break;
+        case 2:
+            if(str[0] > 64 && str[0] < 91){//doplnit
+                printf("diagnoza: %s", str);
+            }else{
+                printf("Nekorektne zadany vstup: diagnoza\n");
+                return -1;
+            }
+            break;
+        case 3:
+            printf("vysetrenie: %s", str);
+            break;
+        case 4:
+            if(atof(str) >= 0 && atof(str) <= 1000){
+            printf("vysledok: %s", str);
+            }else{
+                printf("Nekorektne zadany vstup: vysledok\n");
+                return -1;
+            }
+            break;
+        case 5:
+            if(atoi(str) > 9999999 && atoi(str) < 100000000){
+            printf("datum: %s", str);
+            }else{
+                printf("Nekorektne zadany vstup: datum\n");
+                return -1;
+            }
+            break;
+        case 6:
+            printf("\n");
+        default:
+            break;
+        }
+        
+    }
+    
+    fclose(fr);
+
+    return velkost;
+
+}
+
+int n(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, long long **p_rcislo, double **p_vysledok, int **p_datum){
     FILE *fr;
     char str[MAX];
     int poc = 0;
@@ -85,9 +157,9 @@ int main(void){
     int *datum;
     double *vysledok;
 
-    int velkost = v(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
+    //int velkost = n(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
 
-
+/*
     for (int j = 0; j < velkost; j++){
         printf("%s", meno[j]);
         printf("%lld\n", rcislo[j]);
@@ -97,7 +169,8 @@ int main(void){
         printf("%d\n", datum[j]);
         printf("\n");
     }
-
+*/
+    v();
     return 0;
 }
 

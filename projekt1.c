@@ -78,7 +78,7 @@ int v(){
         }
         
     }
-    
+    printf("\n");
     fclose(fr);
 
     return velkost;
@@ -111,15 +111,18 @@ int n(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, long long **p_rc
         switch (i%7)
         {
         case 0:
+            str[strlen(str)-1] = 0;
             (*p_meno)[i/7] = strdup(str);
             break;
         case 1:
             (*p_rcislo)[i/7] = atoll(strdup(str));
             break;
         case 2:
+            str[strlen(str)-1] = 0;
             (*p_diagnoza)[i/7] = strdup(str);
             break;
         case 3:
+            str[strlen(str)-1] = 0;
             (*p_vysetrenie)[i/7] = strdup(str);
             break;
         case 4:
@@ -133,7 +136,7 @@ int n(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, long long **p_rc
         }
     }
     fclose(fr);
-
+/*
     for (int j = 0; j < velkost; j++){
         printf("%s", (*p_meno)[j]);
         printf("%lld\n", (*p_rcislo)[j]);
@@ -143,34 +146,65 @@ int n(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, long long **p_rc
         printf("%d\n", (*p_datum)[j]);
         printf("\n");
     }
-
+*/
     return velkost;
+}
+
+int s(int velkost, char **p_vysetrenie, long long *p_rcislo, double *p_vysledok){
+    long long rcislo;
+    scanf("%lld", &rcislo);
+    printf("%lld\n", p_rcislo[1]);
+    for(int i = 0; i < velkost; i++){
+        if(rcislo == p_rcislo[i]){
+            printf("Vysledky vysetreni, ktore boli vykonane pacientovi s rodnym cislom %lld su nasledovne:\n%s: %.2lf\n", p_rcislo[i], p_vysetrenie[i], p_vysledok[i]);
+            break;
+        }
+    }
+}
+
+void o(int velkost, int *p_datum, char **p_diagnoza){ //not ready
+    int date;
+    scanf("%d", &date);
+    for(int i = 0; i < velkost; i++){
+        if(date >= p_datum[i]){
+            printf("%s", p_diagnoza[i]);
+
+        }
+    }
+} 
+
+void p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, long long *p_rcislo, double *p_vysledok, int *p_datum){
+    int datum;
+    long long rcislo;
+    char vysetrenie[MAX];
+    double vysledok;
+    scanf("%lld", &rcislo);
+    scanf("%s", &vysetrenie);
+    scanf("%d", &datum);
+    scanf("%lf", &vysledok);
+    for(int i = 0; i < velkost; i++){
+        if(rcislo == (p_rcislo)[i] && strcmp(vysetrenie, p_vysetrenie[i]) == 0){
+            
+            printf("Pacientovi s rodnym cislom %lld bol zmeneny vysledok vysetrenia %s z povodnej hodnoty %.2lf na novu hodnotu %.2lf", p_rcislo[i], p_vysetrenie[i], p_vysledok[i], vysledok);
+            
+        }
+    }
 }
 
 int main(void){
 
-    
-    char **meno;
-    char **diagnoza;
-    char **vysetrenie;
+    char **meno, **diagnoza, **vysetrenie;
     long long *rcislo;
     int *datum;
     double *vysledok;
 
-    //int velkost = n(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
-
-/*
-    for (int j = 0; j < velkost; j++){
-        printf("%s", meno[j]);
-        printf("%lld\n", rcislo[j]);
-        printf("%s", diagnoza[j]);
-        printf("%s", vysetrenie[j]);
-        printf("%.4lf\n", vysledok[j]);
-        printf("%d\n", datum[j]);
-        printf("\n");
-    }
-*/
     v();
+    int velkost = n(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
+    //o(velkost, datum, diagnoza);
+    //s(velkost, vysetrenie, rcislo, vysledok);
+    //p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum);
+
+    
     return 0;
 }
 

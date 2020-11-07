@@ -7,11 +7,13 @@
 */
 
 #define _CRT_SECURE_NO_WARNINGS
+
 #include<stdio.h>//poznamka
 #include<stdlib.h>
 #include<string.h>
 
 #define MAX 50
+
 
 int v(){ //ready
     FILE *fr;
@@ -84,15 +86,44 @@ int v(){ //ready
 
 }
 
-void o(int velkost, int *p_datum, char **p_diagnoza){ //not ready
-    int date;
-    scanf("%d", &date);
+int o(int velkost, int *p_datum, char **p_diagnoza){ //ready, este treba upravit aby to islo aj bez alokovanych poli
+    int datum, pocet = 0;
+    char **arr_diagnozy = (char**) calloc(velkost, sizeof(char*));
+    int *arr_pocty = (int*) calloc(velkost, sizeof(int));
+    scanf("%d", &datum);
     for(int i = 0; i < velkost; i++){
-        if(date >= p_datum[i]){
-            printf("%s", p_diagnoza[i]);
-
+        if(datum >= p_datum[i]){
+            arr_diagnozy[i] = p_diagnoza[i];
+            pocet++;
         }
     }
+    
+    int poc = 0;
+    for (int i = 0; i < pocet; i++){
+        for (int j = 0; j < pocet; j++){
+            if(strcmp(arr_diagnozy[i], arr_diagnozy[j]) == 0){
+                poc++;
+            }
+        }
+        arr_pocty[i] = poc;
+        poc = 0;
+    }
+    int max = 0;
+    for (int i = 0; i < pocet; i++){
+        if(arr_pocty[i] >= max){
+            max = arr_pocty[i];
+        }
+        //printf("%d, ", arr_pocty[i]);
+        //printf("%s, ", arr_diagnozy[i]);
+    }
+    for (int i = 0; i < pocet; i++){
+        if(arr_pocty[i] == max){
+            printf("Najcastejsie vysetrovana diagnoza do %d je %s.\n", datum, arr_diagnozy[i]);
+            return 0;
+        }
+    }
+    free(arr_diagnozy);
+    free(arr_pocty);
 } 
 
 int n(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //ready
@@ -173,7 +204,7 @@ int s(int velkost, char **p_vysetrenie, char **p_rcislo, double *p_vysledok){ //
     }
 }
 
-void h(int velkost, char **p_rcislo, char **p_diagnoza){ //almost ready
+void h(int velkost, char **p_rcislo, char **p_diagnoza){ //ready AF
     char diagn[MAX];
     scanf("%s", diagn);
     int vek = 0, j = 0;
@@ -204,23 +235,73 @@ void h(int velkost, char **p_rcislo, char **p_diagnoza){ //almost ready
             j++;
         }
     }
+    int *arr_vek_ktory_uz_bol = (int*) calloc(j, sizeof(int));
+    int vek_ktory_uz_bol = 0;
     vek = 0;
-    int cislo = 1;
-    
+    int cislo = 0;
     
     printf("Muzi\n");
-    for(int i = 0; i < j; i++){
+    for (int i = 0; i < j; i++){
         if(strcmp(arr_pohlavie[i], "Muz") == 0){
-            printf("%d: %d\n", arr_vek[i], 1);
+            for(int l = 0; l < j; l++){
+                if (arr_vek[i] == arr_vek_ktory_uz_bol[l]){
+                    vek_ktory_uz_bol = 1;
+                }
+            }
+            if(vek_ktory_uz_bol == 0){
+                if(arr_vek[i] == vek){
+                cislo++;
+            }else{
+                vek = arr_vek[i];
+            }
+            for (int k = 0; k < j; k++){
+                if(arr_vek[k] == vek && strcmp(arr_pohlavie[k], "Muz") == 0){
+                    cislo++;
+                }else{
+                    vek = arr_vek[i];
+                }
+            }
+            printf("%d: %d\n", arr_vek[i], cislo);
+            }
+            arr_vek_ktory_uz_bol[i] = arr_vek[i]; 
         }
-    }
-    printf("Zeny\n");
-    for(int i = 0; i < j; i++){
-        if(strcmp(arr_pohlavie[i], "Zena") == 0){
-            printf("%d: %d\n", arr_vek[i], 1);
-        }
+        cislo = 0;
+        vek_ktory_uz_bol = 0;
     }
     
+    for (int i = 0; i < j; i++){
+        arr_vek_ktory_uz_bol[i] = 0;
+    }
+    
+    
+    printf("Zeny\n");
+    for (int i = 0; i < j; i++){
+        if(strcmp(arr_pohlavie[i], "Zena") == 0){
+            for(int l = 0; l < j; l++){
+                if (arr_vek[i] == arr_vek_ktory_uz_bol[l]){
+                    vek_ktory_uz_bol = 1;
+                }
+            }
+            if(vek_ktory_uz_bol == 0){
+                if(arr_vek[i] == vek){
+                cislo++;
+            }else{
+                vek = arr_vek[i];
+            }
+            for (int k = 0; k < j; k++){
+                if(arr_vek[k] == vek && strcmp(arr_pohlavie[k], "Zena") == 0){
+                    cislo++;
+                }else{
+                    vek = arr_vek[i];
+                }
+            }
+            printf("%d: %d\n", arr_vek[i], cislo);
+            }
+            arr_vek_ktory_uz_bol[i] = arr_vek[i]; 
+        }
+        cislo = 0;
+        vek_ktory_uz_bol = 0;
+    }
 }
 
 void p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char **p_rcislo, double *p_vysledok, int *p_datum){//ready
@@ -255,7 +336,20 @@ void p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char 
     
 }
 
-void z(){ //empty
+void z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum){ //empty
+    int date1, date2, max1, max2, max3;
+    char vysetrenie[MAX];
+    scanf("%d", &date1);
+    scanf("%d", &date2);
+    scanf("%s", &vysetrenie);
+    
+    for (int i = 0; i < velkost; i++)
+    {
+        if(p_datum[i] >= date1 && p_datum[i] <= date2){
+
+        }
+    }
+    
 
 }
 
@@ -263,7 +357,7 @@ void k(){ //empty
 
 }
 
-int main(void){
+int main(void){ //main
 
     char **meno, **diagnoza, **vysetrenie, **rcislo;
     int *datum;
@@ -274,7 +368,8 @@ int main(void){
     //o(velkost, datum, diagnoza);
     //s(velkost, vysetrenie, rcislo, vysledok);
     //p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum);
-    //h(velkost, rcislo, diagnoza);
+    h(velkost, rcislo, diagnoza);
+    //z(velkost, meno, vysetrenie, datum);
 
     return 0;
 }

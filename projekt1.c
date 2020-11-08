@@ -12,10 +12,10 @@
 #include<stdlib.h>
 #include<string.h>
 
-#define MAX 50
+#define MAX 100
 
 
-int v(FILE **fr){ //ready
+int v(FILE **fr){ //ready AF
     char str[MAX];
     int poc = 0;
     if((*fr = fopen("pacienti.txt", "r")) == NULL){
@@ -34,6 +34,10 @@ int v(FILE **fr){ //ready
         switch (i%7)
         {
         case 0:
+            if(strlen(str) > 50){
+                printf("Nekorektne zadany vstup: meno\n");
+                return -1;
+            }
             printf("meno a priezvisko: %s", str);
             break;
         case 1:
@@ -45,7 +49,7 @@ int v(FILE **fr){ //ready
             }
             break;
         case 2:
-            if(str[0] > 64 && str[0] < 91){//doplnit
+            if(str[0] > 64 && str[0] < 91 && str[1] >= 48 && str[1] <= 57 && str[2] >= 48 && str[2] <= 57 && strlen(str) == 4){
                 printf("diagnoza: %s", str);
             }else{
                 printf("Nekorektne zadany vstup: diagnoza\n");
@@ -53,6 +57,10 @@ int v(FILE **fr){ //ready
             }
             break;
         case 3:
+            if(strlen(str) > 50){
+                printf("Nekorektne zadany vstup: vysetrenie\n");
+                return -1;
+            }
             printf("vysetrenie: %s", str);
             break;
         case 4:
@@ -79,12 +87,13 @@ int v(FILE **fr){ //ready
         
     }
     printf("\n");
+    printf("\n");
 
     return velkost;
 
 }
 
-int o(FILE *fr){ //ready
+int o(FILE *fr){ //ready AF
     char str[MAX];
     int poc1 = 0;
     if(fr == NULL){
@@ -166,7 +175,9 @@ int o(FILE *fr){ //ready
     free(arr_pocty);
 } 
 
-int n(FILE *fr, char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //ready
+int n(FILE *fr, char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //ready AF
+    
+    
     char str[MAX];
     int poc = 0;
     if(fr == NULL){
@@ -216,34 +227,34 @@ int n(FILE *fr, char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char *
             break;
         }
     }
-    //fclose(fr);
-/*
-    for (int j = 0; j < velkost; j++){
-        printf("%s\n", (*p_meno)[j]);
-        printf("%s\n", (*p_rcislo)[j]);
-        printf("%s\n", (*p_diagnoza)[j]);
-        printf("%s\n", (*p_vysetrenie)[j]);
-        printf("%.4lf\n", (*p_vysledok)[j]);
-        printf("%d\n", (*p_datum)[j]);
-        printf("\n");
-    }
-*/
     return velkost;
 }
 
-int s(int velkost, char **p_vysetrenie, char **p_rcislo, double *p_vysledok){ //ready
+int s(int velkost, char **p_vysetrenie, char **p_rcislo, double *p_vysledok){ //ready AF
+    if (velkost == -1)
+    {
+        printf("Polia nie su vytvorene.\n");
+        return -1;
+    }
+    
     long long rcislo;
     scanf("%lld", &rcislo);
     printf("%s\n", p_rcislo[1]);
     for(int i = 0; i < velkost; i++){
         if(rcislo == atoll(p_rcislo[i])){
             printf("Vysledky vysetreni, ktore boli vykonane pacientovi s rodnym cislom %lld su nasledovne:\n%s: %.2lf\n", atoll(p_rcislo[i]), p_vysetrenie[i], p_vysledok[i]);
-            break;
+            return 0;
         }
     }
 }
 
-void h(int velkost, char **p_rcislo, char **p_diagnoza){ //ready AF
+int h(int velkost, char **p_rcislo, char **p_diagnoza){ //ready AF
+    if (velkost == -1)
+    {
+        printf("Polia nie su vytvorene.\n");
+        return -1;
+    }
+
     char diagn[MAX];
     scanf("%s", diagn);
     int vek = 0, j = 0;
@@ -343,7 +354,7 @@ void h(int velkost, char **p_rcislo, char **p_diagnoza){ //ready AF
     }
 }
 
-void p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char **p_rcislo, double *p_vysledok, int *p_datum){//ready
+int p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char **p_rcislo, double *p_vysledok, int *p_datum){//ready AF
     int datum;
     long long rcislo;
     char vysetrenie[MAX];
@@ -354,11 +365,18 @@ void p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char 
     scanf("%lf", &vysledok);
     for(int i = 0; i < velkost; i++){
         if(rcislo == atoll(p_rcislo[i]) && strcmp(vysetrenie, p_vysetrenie[i]) == 0){
+            
+            FILE *fr;
+            if((fr = fopen("pacienti.txt", "w")) == NULL){
+                printf("Neotvoreny subor\n");
+                return -1;
+            }
+
             printf("Pacientovi s rodnym cislom %lld bol zmeneny vysledok vysetrenia %s z povodnej hodnoty %.2lf na novu hodnotu %.2lf\n", atoll(p_rcislo[i]), p_vysetrenie[i], p_vysledok[i], vysledok);
             p_vysledok[i] = vysledok;
             p_datum[i] = datum;
-            FILE *fr;
-            fr = fopen("pacienti.txt", "w");
+
+
             for(int j = 0; j < velkost; j++){
                 fprintf(fr, "%s\n", p_meno[j]);
                 fprintf(fr, "%s\n", p_rcislo[j]);
@@ -369,19 +387,30 @@ void p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char 
                 fprintf(fr, "\n");
             }
             
-            break;
+            return 0;
         }
     }
     
 }
 
-void z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum, double *p_vysledok){ //ready
+int z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum, double *p_vysledok){ //ready AF
+
+    if (velkost == -1)
+    {
+        printf("Polia nie su vytvorene.\n");
+        return -1;
+    }
+
     int date1, date2;
     double max1 = 0, max2 = 0, max3 = 0;
     char vysetrenie[MAX];
     scanf("%d", &date1);
     scanf("%d", &date2);
     scanf("%s", &vysetrenie);
+    if(date1 > date2){
+        printf("Koncovy datum sa nachadza pred pociatocnym datumom.\n");
+        return -1;
+    }
     double *vysledok = (double*) calloc(velkost, sizeof(double));
     
     for (int i = 0; i < velkost; i++)
@@ -416,7 +445,7 @@ void z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum, double *p_
     free(vysledok);
 }
 
-void k(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //empty
+void k(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //ready AF
     free(*p_meno);
     free(*p_diagnoza);
     free(*p_vysetrenie);
@@ -433,13 +462,15 @@ int main(void){ //main
 
     FILE *subor = NULL;
     char funkcia;
-    int velkost = 0;
+    int velkost = -1;
 
     while(1){
         
         scanf("%c", &funkcia);
         if(funkcia == 'v'){
-            v(&subor);
+            if(v(&subor) == -1){
+                return 0;
+            }
         }
         if(funkcia == 'n'){
             velkost = n(subor, &meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
@@ -451,7 +482,9 @@ int main(void){ //main
             s(velkost, vysetrenie, rcislo, vysledok);
         }
         if(funkcia == 'p'){
-            p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum);
+            if(p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum) == -1){
+                return 0;
+            }
         }
         if(funkcia == 'h'){
             h(velkost, rcislo, diagnoza);

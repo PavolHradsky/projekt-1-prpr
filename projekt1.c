@@ -336,25 +336,54 @@ void p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char 
     
 }
 
-void z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum){ //empty
-    int date1, date2, max1, max2, max3;
+void z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum, double *p_vysledok){ //ready
+    int date1, date2;
+    double max1 = 0, max2 = 0, max3 = 0;
     char vysetrenie[MAX];
     scanf("%d", &date1);
     scanf("%d", &date2);
     scanf("%s", &vysetrenie);
+    double *vysledok = (double*) calloc(velkost, sizeof(double));
     
     for (int i = 0; i < velkost; i++)
     {
-        if(p_datum[i] >= date1 && p_datum[i] <= date2){
-
+        if(p_datum[i] >= date1 && p_datum[i] <= date2 && strcmp(vysetrenie, p_vysetrenie[i]) == 0){
+            vysledok[i] = p_vysledok[i];
         }
     }
     
-
+    for (int i = 0; i < velkost; i++)
+    {
+        if (vysledok[i] >= max1){
+            max1 = vysledok[i];
+        }else if (vysledok[i] >= max2){
+            max2 = vysledok[i];
+        }else if (vysledok[i] >= max3){
+            max3 = vysledok[i];
+        }
+    }
+    for (int i = 0; i < velkost; i++)
+    {
+        if(max1 == p_vysledok[i]){
+            printf("%s (%.2lf)\n", p_meno[i], max1);
+        }
+        if(max2 == p_vysledok[i]){
+            printf("%s (%.2lf)\n", p_meno[i], max2);
+        }
+        if(max3 == p_vysledok[i]){
+            printf("%s (%.2lf)\n", p_meno[i], max3);
+        }
+    }
+    free(vysledok);
 }
 
-void k(){ //empty
-
+void k(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //empty
+    free(*p_meno);
+    free(*p_diagnoza);
+    free(*p_vysetrenie);
+    free(*p_rcislo);
+    free(*p_vysledok);
+    free(*p_datum);
 }
 
 int main(void){ //main
@@ -368,9 +397,9 @@ int main(void){ //main
     //o(velkost, datum, diagnoza);
     //s(velkost, vysetrenie, rcislo, vysledok);
     //p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum);
-    h(velkost, rcislo, diagnoza);
-    //z(velkost, meno, vysetrenie, datum);
-
+    //h(velkost, rcislo, diagnoza);
+    //z(velkost, meno, vysetrenie, datum, vysledok);
+    k(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
     return 0;
 }
 

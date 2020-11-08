@@ -15,23 +15,22 @@
 #define MAX 50
 
 
-int v(){ //ready
-    FILE *fr;
+int v(FILE **fr){ //ready
     char str[MAX];
     int poc = 0;
-    if((fr = fopen("pacienti.txt", "r")) == NULL){
+    if((*fr = fopen("pacienti.txt", "r")) == NULL){
         printf("Neotvoreny subor\n");
         return -1;
     }
 
-    while ((fgets(str, MAX, fr)) != NULL){
+    while ((fgets(str, MAX, *fr)) != NULL){
         poc++;
     }
-    rewind(fr);
+    rewind(*fr);
     int velkost = poc/7 + 1;
     long long x;
     for(int i = 0; i < poc; i++){
-        fgets(str, MAX, fr);
+        fgets(str, MAX, *fr);
         switch (i%7)
         {
         case 0:
@@ -80,24 +79,66 @@ int v(){ //ready
         
     }
     printf("\n");
-    fclose(fr);
 
     return velkost;
 
 }
 
-int o(int velkost, int *p_datum, char **p_diagnoza){ //ready, este treba upravit aby to islo aj bez alokovanych poli
-    int datum, pocet = 0;
-    char **arr_diagnozy = (char**) calloc(velkost, sizeof(char*));
-    int *arr_pocty = (int*) calloc(velkost, sizeof(int));
-    scanf("%d", &datum);
-    for(int i = 0; i < velkost; i++){
-        if(datum >= p_datum[i]){
-            arr_diagnozy[i] = p_diagnoza[i];
-            pocet++;
+int o(FILE *fr){ //ready
+    char str[MAX];
+    int poc1 = 0;
+    if(fr == NULL){
+        printf("Neotvoreny subor\n");
+        return 1;
+    }
+    rewind(fr);
+    while ((fgets(str, MAX, fr)) != NULL){
+        poc1++;
+    }
+    rewind(fr);
+    int velkost = poc1/7 + 1;
+
+    char **p_diagnoza;
+    int *p_datum;
+    p_diagnoza = (char**) calloc(velkost, sizeof(char*));
+    p_datum = (int*) calloc(velkost, sizeof(int));
+
+    for(int i = 0; i < poc1; i++){
+        fgets(str, MAX, fr);
+        switch (i%7)
+        {
+        case 2:
+            str[strlen(str)-1] = 0;
+            p_diagnoza[i/7] = strdup(str);
+            break;
+        case 5:
+            p_datum[i/7] = atoi(strdup(str));
+            break;
+        default:
+            break;
         }
     }
+
+    int datum, pocet = 0;
     
+    scanf("%d", &datum);
+
+    for(int i = 0; i < velkost; i++){
+        if(datum >= p_datum[i]){
+            pocet++;  
+        }
+    }
+
+    char **arr_diagnozy = (char**) calloc(pocet, sizeof(char*));
+    int *arr_pocty = (int*) calloc(pocet, sizeof(int));
+    int j = 0;
+    for(int i = 0; i < velkost; i++){
+        if(datum >= p_datum[i]){
+            arr_diagnozy[j] = p_diagnoza[i];
+            j++;
+        }
+    }
+
     int poc = 0;
     for (int i = 0; i < pocet; i++){
         for (int j = 0; j < pocet; j++){
@@ -108,13 +149,12 @@ int o(int velkost, int *p_datum, char **p_diagnoza){ //ready, este treba upravit
         arr_pocty[i] = poc;
         poc = 0;
     }
+    
     int max = 0;
     for (int i = 0; i < pocet; i++){
         if(arr_pocty[i] >= max){
             max = arr_pocty[i];
         }
-        //printf("%d, ", arr_pocty[i]);
-        //printf("%s, ", arr_diagnozy[i]);
     }
     for (int i = 0; i < pocet; i++){
         if(arr_pocty[i] == max){
@@ -126,15 +166,14 @@ int o(int velkost, int *p_datum, char **p_diagnoza){ //ready, este treba upravit
     free(arr_pocty);
 } 
 
-int n(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //ready
-    FILE *fr;
+int n(FILE *fr, char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //ready
     char str[MAX];
     int poc = 0;
-    if((fr = fopen("pacienti.txt", "r")) == NULL){
+    if(fr == NULL){
         printf("Neotvoreny subor\n");
         return 1;
     }
-
+    rewind(fr);
     while ((fgets(str, MAX, fr)) != NULL){
         poc++;
     }
@@ -177,7 +216,7 @@ int n(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo
             break;
         }
     }
-    fclose(fr);
+    //fclose(fr);
 /*
     for (int j = 0; j < velkost; j++){
         printf("%s\n", (*p_meno)[j]);
@@ -392,113 +431,51 @@ int main(void){ //main
     int *datum;
     double *vysledok;
 
-    v();
-    int velkost = n(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
+    FILE *subor = NULL;
+    char funkcia;
+    int velkost = 0;
+
+    while(1){
+        
+        scanf("%c", &funkcia);
+        if(funkcia == 'v'){
+            v(&subor);
+        }
+        if(funkcia == 'n'){
+            velkost = n(subor, &meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
+        }
+        if(funkcia == 'o'){
+            o(subor);
+        }
+        if(funkcia == 's'){
+            s(velkost, vysetrenie, rcislo, vysledok);
+        }
+        if(funkcia == 'p'){
+            p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum);
+        }
+        if(funkcia == 'h'){
+            h(velkost, rcislo, diagnoza);
+        }
+        if(funkcia == 'z'){
+            z(velkost, meno, vysetrenie, datum, vysledok);
+        }
+        if(funkcia == 'k'){
+            k(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
+            break;
+        }
+    }
+/*
+    v(&subor);
+    int velkost = n(subor, &meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
     //o(velkost, datum, diagnoza);
     //s(velkost, vysetrenie, rcislo, vysledok);
     //p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum);
     //h(velkost, rcislo, diagnoza);
     //z(velkost, meno, vysetrenie, datum, vysledok);
     k(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
-    return 0;
-}
-
-/*
-void o(int velkost, int *datum, char **diagnoza){
-    int date;
-    scanf("%d", &date);
-    for(int i = 0; i < velkost; i++){
-        if(date >= datum[i]){
-            printf("%s", diagnoza[i]);
-
-        }
-    }
-} 
-
-int s(int velkost, char **p_vysetrenie, long long *p_rcislo, double *p_vysledok){
-    long long cislo;
-    scanf("%lld", &cislo);
-    printf("%lld\n", p_rcislo[1]);
-    for(int i = 0; i < velkost; i++){
-        if(cislo == p_rcislo[i]){
-            printf("Vysledky vysetreni, ktore boli vykonane pacientovi s rodnym cislom %lld su nasledovne:\n%s: %.2lf\n", p_rcislo[i], p_vysetrenie[i], p_vysledok[i]);
-            break;
-        }
-    }
-}
-
-int vek(int rc){
-
-}
-
-int h(int velkost, long long *p_rcislo, char **p_diagnoza){
-    char diagn[MAX];
-    scanf("%s", diagn);
-
-}
-
-int main(void){
-
-    FILE *fr;
-    char str[MAX];
-    int poc = 0;
-    if((fr = fopen("pacienti.txt", "r")) == NULL){
-        printf("Neotvoreny subor\n");
-        return 1;
-    }
-
-    while ((fgets(str, MAX, fr)) != NULL){
-        poc++;
-    }
-    rewind(fr);
-    int velkost = poc/7 + 1;
-
-    char **meno = (char**) calloc(velkost, sizeof(char*));
-    char **diagnoza = (char**) calloc(velkost, sizeof(char*));
-    char **vysetrenie = (char**) calloc(velkost, sizeof(char*));
-    long long *rcislo = (long long*) calloc(velkost, sizeof(long long));
-    int *datum = (int*) calloc(velkost, sizeof(int));
-    double *vysledok = (double*) calloc(velkost, sizeof(double));
-    for(int i = 0; i < poc; i++){
-        fgets(str, MAX, fr);
-        switch (i%7)
-        {
-        case 0:
-            meno[i/7] = strdup(str);
-            break;
-        case 1:
-            rcislo[i/7] = atoll(strdup(str));
-            break;
-        case 2:
-            diagnoza[i/7] = strdup(str);
-            break;
-        case 3:
-            vysetrenie[i/7] = strdup(str);
-            break;
-        case 4:
-            vysledok[i/7] = atof(strdup(str));
-            break;
-        case 5:
-            datum[i/7] = atoi(strdup(str));
-            break;
-        default:
-            break;
-        }
-    }
-
-    for (int j = 0; j < velkost; j++){
-        printf("%s", meno[j]);
-        printf("%lld\n", rcislo[j]);
-        printf("%s", diagnoza[j]);
-        printf("%s", vysetrenie[j]);
-        printf("%.4lf\n", vysledok[j]);
-        printf("%d\n", datum[j]);
-        printf("\n");
-    }
-
-    //o(velkost, datum, diagnoza);
-    //s(velkost, vysetrenie, rcislo, vysledok);
-
-    return 0;
-}
 */
+    fclose(subor);
+    
+
+    return 0;
+}

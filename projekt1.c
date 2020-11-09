@@ -366,8 +366,8 @@ int p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char *
     for(int i = 0; i < velkost; i++){
         if(rcislo == atoll(p_rcislo[i]) && strcmp(vysetrenie, p_vysetrenie[i]) == 0){
             
-            FILE *fr;
-            if((fr = fopen("pacienti.txt", "w")) == NULL){
+            FILE *fw;
+            if((fw = fopen("pacienti.txt", "w")) == NULL){
                 printf("Neotvoreny subor\n");
                 return -1;
             }
@@ -378,14 +378,21 @@ int p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char *
 
 
             for(int j = 0; j < velkost; j++){
-                fprintf(fr, "%s\n", p_meno[j]);
-                fprintf(fr, "%s\n", p_rcislo[j]);
-                fprintf(fr, "%s\n", p_diagnoza[j]);
-                fprintf(fr, "%s\n", p_vysetrenie[j]);
-                fprintf(fr, "%.2lf\n", p_vysledok[j]);
-                fprintf(fr, "%d\n", p_datum[j]);
-                fprintf(fr, "\n");
+                fprintf(fw, "%s\n", p_meno[j]);
+                fprintf(fw, "%s\n", p_rcislo[j]);
+                fprintf(fw, "%s\n", p_diagnoza[j]);
+                fprintf(fw, "%s\n", p_vysetrenie[j]);
+                fprintf(fw, "%.2lf\n", p_vysledok[j]);
+                if (j == velkost - 1){
+                    fprintf(fw, "%d", p_datum[j]);
+                } else{
+                    fprintf(fw, "%d\n", p_datum[j]);
+                }
+                if (j != velkost - 1){
+                    fprintf(fw, "\n");
+                }
             }
+            fclose(fw);
             
             return 0;
         }
@@ -497,18 +504,8 @@ int main(void){ //main
             break;
         }
     }
-/*
-    v(&subor);
-    int velkost = n(subor, &meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
-    //o(velkost, datum, diagnoza);
-    //s(velkost, vysetrenie, rcislo, vysledok);
-    //p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum);
-    //h(velkost, rcislo, diagnoza);
-    //z(velkost, meno, vysetrenie, datum, vysledok);
-    k(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
-*/
+
     fclose(subor);
     
-
     return 0;
 }

@@ -8,11 +8,11 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
-#include<stdio.h>//poznamka
+#include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
 
-#define MAX 100
+#define MAX 100 //definovana maximalna velkost stringu
 
 /*      ----FUNKCIA V----       
 * Otvorenie suboru, porovnanie spravnosti a vypisanie hodnot
@@ -423,8 +423,14 @@ int h(int velkost, char **p_rcislo, char **p_diagnoza){ //ready
     free(arr_pohlavie);
 }
 
+/*      ----FUNKCIA P----       
+* vypise a zapise do suboru novu hodnotu vysledku a datum u daneho pacienta
+* input DATUM, RODNE CISLO, VYSETRENIE, VYSLEDOK
+*/
+int p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char **p_rcislo, double *p_vysledok, int *p_datum){//ready
+    //argumenty - velkost a vsetky polia
 
-int p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char **p_rcislo, double *p_vysledok, int *p_datum){//ready AF
+    //vytvorenie premennych a nacitanie vstupov
     int datum;
     long long rcislo;
     char vysetrenie[MAX];
@@ -433,36 +439,42 @@ int p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char *
     scanf("%s", &vysetrenie);
     scanf("%d", &datum);
     scanf("%lf", &vysledok);
+
+    //hladanie zadaneho rodneho cisla a diagnozy v poliach
     for(int i = 0; i < velkost; i++){
-        if(rcislo == atoll(p_rcislo[i]) && strcmp(vysetrenie, p_vysetrenie[i]) == 0){
+        if(rcislo == atoll(p_rcislo[i]) && strcmp(vysetrenie, p_vysetrenie[i]) == 0){ //musia sa rovnat aj rcislo0 aj vysetrenie
             
+            //vytvori premennu a otvori subor na pisanie
             FILE *fw;
-            if((fw = fopen("pacienti.txt", "w")) == NULL){
+            if((fw = fopen("pacienti.txt", "w")) == NULL){ //ak sa subor nepodarilo otvorit, vypise chybovu hlasku a ukonci funkciu
                 printf("Neotvoreny subor\n");
                 return -1;
             }
 
+            //vypise nasledujuci retazec s rcislom, vysetreni a vyslekom zo zaznamov a novym zadanym vysledkom
             printf("Pacientovi s rodnym cislom %lld bol zmeneny vysledok vysetrenia %s z povodnej hodnoty %.2lf na novu hodnotu %.2lf\n", atoll(p_rcislo[i]), p_vysetrenie[i], p_vysledok[i], vysledok);
+            
+            //updatne zaznamy vysledkov a datumov na danom indexe
             p_vysledok[i] = vysledok;
             p_datum[i] = datum;
 
-
+            //cely subor nanovo prepise, s uz novymi udajmy
             for(int j = 0; j < velkost; j++){
                 fprintf(fw, "%s\n", p_meno[j]);
                 fprintf(fw, "%s\n", p_rcislo[j]);
                 fprintf(fw, "%s\n", p_diagnoza[j]);
                 fprintf(fw, "%s\n", p_vysetrenie[j]);
                 fprintf(fw, "%.2lf\n", p_vysledok[j]);
-                if (j == velkost - 1){
+                if (j == velkost - 1){ //ak je to posledny zaznam, na konci nedava "\n"
                     fprintf(fw, "%d", p_datum[j]);
                 } else{
                     fprintf(fw, "%d\n", p_datum[j]);
                 }
-                if (j != velkost - 1){
+                if (j != velkost - 1){ //ak to nieje posledny zaznam, nakonci da "\n"
                     fprintf(fw, "\n");
                 }
             }
-            fclose(fw);
+            fclose(fw); //zatvori subor
             
             return 0;
         }
@@ -470,44 +482,59 @@ int p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char *
     
 }
 
+/*      ----FUNKCIA Z----       
+* nacita dva datumy a vysetrenie a vypise troch pacientov s najvacsimi hodnotami s rovnakym vysetrenim
+* input DATUM 1, DATUM 2, VYSETRENIE
+*/
+int z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum, double *p_vysledok){ //ready
+    //argumenty - velkost, polia mien, vysetreni, dattumov a vysledkov
 
-int z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum, double *p_vysledok){ //ready AF
-
+    //overenie ci boli polia vytvorene (defoult velkosti je -1, ak boli vytvorene, velkost bude minimalne 0)
     if (velkost == -1)
     {
         printf("Polia nie su vytvorene.\n");
         return -1;
     }
 
+    //vytvorenie premennych a nacitanie datumov a vysetrenia
     int date1, date2;
     double max1 = 0, max2 = 0, max3 = 0;
     char vysetrenie[MAX];
     scanf("%d", &date1);
     scanf("%d", &date2);
     scanf("%s", &vysetrenie);
+
+    //ak je datum 1 vacsi ako datum 2, vypise chybu a funkcia sa ukonci
     if(date1 > date2){
         printf("Koncovy datum sa nachadza pred pociatocnym datumom.\n");
         return -1;
     }
-    double *vysledok = (double*) calloc(velkost, sizeof(double));
+
+    //dynamicke alokovanie pola velkosi "velkost" na zapisovanie vysledkov
+    double *vysledok = (double*) calloc(velkost, sizeof(double)); //volanie calloc vyplni vsetky hodnoty na defoultnu hodnotu 0
     
+    //postupne prejde vsetky zaznamy a porovnava ci je datum v nami zadanom intervale a zaroven ci vysetrenie sedi s nami zadanym vysetrenim
     for (int i = 0; i < velkost; i++)
     {
         if(p_datum[i] >= date1 && p_datum[i] <= date2 && strcmp(vysetrenie, p_vysetrenie[i]) == 0){
-            vysledok[i] = p_vysledok[i];
+            vysledok[i] = p_vysledok[i]; //ak toto vsetko plati, vysledok s danym indexom sa zapise do pola vysledkov
         }
     }
     
+    //zistovanie 3 najvacsich vysledkov v poli (zvysok pola su 0)
     for (int i = 0; i < velkost; i++)
     {
-        if (vysledok[i] >= max1){
+        if (vysledok[i] >= max1){ //najvacsi vysledok zapise do max1
             max1 = vysledok[i];
         }else if (vysledok[i] >= max2){
-            max2 = vysledok[i];
+            max2 = vysledok[i]; //2. najvacsi vysledok zapise do max2
         }else if (vysledok[i] >= max3){
-            max3 = vysledok[i];
+            max3 = vysledok[i]; //3. najvacsi vysledok zapise do max2
         }
     }
+
+    //este raz prejde cele pole vysledkov a ak sa vysledok zhoduje s jednym s maxim, vypise ho
+    //vysledky nemusia byt v poradi od najvacsieho po najmensie
     for (int i = 0; i < velkost; i++)
     {
         if(max1 == p_vysledok[i]){
@@ -520,11 +547,18 @@ int z(int velkost, char **p_meno, char **p_vysetrenie, int *p_datum, double *p_v
             printf("%s (%.2lf)\n", p_meno[i], max3);
         }
     }
+
+    //uvolni alokovane pole
     free(vysledok);
 }
 
+/*      ----FUNKCIA K----       
+* uvoli vsetky alokovanie polia v maine
+*/
+void k(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //ready
+    //argumenty - pointre na vsetky polia alokovanie v maine
 
-void k(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcislo, double **p_vysledok, int **p_datum){ //ready AF
+    //uvolnenie vsetkych poli
     free(*p_meno);
     free(*p_diagnoza);
     free(*p_vysetrenie);
@@ -533,51 +567,67 @@ void k(char ***p_meno, char ***p_diagnoza, char ***p_vysetrenie, char ***p_rcisl
     free(*p_datum);
 }
 
+/*      ----MAIN----       
+* vytvorenie premennych, ktore sa budu neskor alokovat vo funkcii n
+* vytvorenie premennej typu FILE, ktora sa bude otvarat vo funkcii v
+* nekonecny cyklus ktory sleduje vstupy z klavesnice a spusta jednotlyve funkcie
+*/
 int main(void){ //main
 
+    //vytvorenie premennych na ktorych sa budu alokovat polia
     char **meno, **diagnoza, **vysetrenie, **rcislo;
     int *datum;
     double *vysledok;
 
+    //vytvorenie premennej typu FILE, na ktorej sa bude otvarat subor
     FILE *subor = NULL;
-    char funkcia;
-    int velkost = -1;
+    char funkcia; //premenna na sledovanie vstupu z klavesnice
+    int velkost = -1; //defoultna velkost suboru
 
-    while(1){
+    //volanie funkcii
+    while(1){ //nekonecny cyklus
         
-        scanf("%c", &funkcia);
+        scanf("%c", &funkcia); //nacitanie znaku do premennej funkcia
+        //funkcia v
         if(funkcia == 'v'){
-            if(v(&subor) == -1){
+            if(v(&subor) == -1){ //ak sa vrati -1 (nejaka chyba vo funkcii) program sa ukonci
                 return 0;
             }
         }
+        //funkcia n
         if(funkcia == 'n'){
-            velkost = n(subor, &meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
+            velkost = n(subor, &meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum); //volanie funkcie s argumentom - adresy na premenne na polia
         }
+        //funkcia o
         if(funkcia == 'o'){
-            o(subor);
+            o(subor); //volanie funkcie s premennou na otvorenie suboru
         }
+        //funkcia s
         if(funkcia == 's'){
-            s(velkost, vysetrenie, rcislo, vysledok);
+            s(velkost, vysetrenie, rcislo, vysledok); //volanie funkcie s argumentmi - vysledok a dane polia
         }
+        //funkcia p
         if(funkcia == 'p'){
-            if(p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum) == -1){
+            if(p(velkost, meno, diagnoza, vysetrenie, rcislo, vysledok, datum) == -1){ //volanie funkcie s argumentmi - vysledok a dane polia, ak sa vrati -1 (chyba vo funkcii) program sa ukonci
                 return 0;
             }
         }
+        //funkcia h
         if(funkcia == 'h'){
-            h(velkost, rcislo, diagnoza);
+            h(velkost, rcislo, diagnoza); //volanie funkcie s argumentmi - vysledok a dane polia
         }
+        //funkcia z
         if(funkcia == 'z'){
-            z(velkost, meno, vysetrenie, datum, vysledok);
+            z(velkost, meno, vysetrenie, datum, vysledok); //volanie funkcie s argumentmi - vysledok a dane polia
         }
+        //funkcia k
         if(funkcia == 'k'){
-            k(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum);
-            break;
+            k(&meno, &diagnoza, &vysetrenie, &rcislo, &vysledok, &datum); //volanie funkcie s argumentmi - adresy poli
+            break; //odidenie z cyklu
         }
     }
 
-    fclose(subor);
+    fclose(subor); //zatvorenie suboru
     
-    return 0;
+    return 0; //ukoncenie programu
 }

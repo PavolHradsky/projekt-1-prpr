@@ -40,7 +40,7 @@ int v(FILE **fr){ //ready
                      //pri kazdom pripade skontrolujeme ci je udaj spravny a vypiseme ho spolu s popisom pred nim
         {
         case 0: //  MENO
-            if(strlen(str) > 50){ //sledujeme, ci je meno dlhsie ako  50 znakov
+            if(strlen(str) > 50 && (atoll(str)%11==0)){ //sledujeme, ci je meno dlhsie ako  50 znakov a ci je delitelne 11
                 printf("Nekorektne zadany vstup: meno\n"); //ak ano, program vypise chybu a vrati -1
                 return -1;
             }
@@ -425,7 +425,7 @@ int h(int velkost, char **p_rcislo, char **p_diagnoza){ //ready
 
 /*      ----FUNKCIA P----       
 * vypise a zapise do suboru novu hodnotu vysledku a datum u daneho pacienta
-* input DATUM, RODNE CISLO, VYSETRENIE, VYSLEDOK
+* input RODNE CISLO, VYSETRENIE, DATUM, VYSLEDOK
 */
 int p(int velkost, char **p_meno, char **p_diagnoza, char **p_vysetrenie, char **p_rcislo, double *p_vysledok, int *p_datum){//ready
     //argumenty - velkost a vsetky polia
